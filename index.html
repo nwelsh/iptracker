@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+  <title>Frontend Mentor | IP Address Tracker</title>
+  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 400px;
+    }
+  </style>
+</head>
+
+<body>
+  <img src="./images/pattern-bg-desktop.png" class="background-image-hdr">
+  <p class="title">IP Address Tracker</p>
+
+  <!-- search bar -->
+  <div class="search-container">
+    <form>
+      <input class="search-bar" type="text" placeholder="Search.." name="search" id="user_search">
+      <button class="search-button" onclick="searchIP()">></button>
+    </form>
+  </div>
+
+
+  <!-- information container -->
+  <div class="information-container">
+    <div>
+      <p class="info-titles">IP ADDRESS</p>
+      <p class="info" id="ip">8.8.8.8</p>
+    </div>
+    <div class="vl"></div>
+    <div>
+      <p class="info-titles">LOCATION</p>
+      <p class="info" id="loc">Brooklyn, NY</p>
+    </div>
+    <div class="vl"></div>
+    <div>
+      <p class="info-titles">TIMEZONE</p>
+      <p class="info" id="timezone">UTC-05:00</p>
+    </div>
+    <div class="vl"></div>
+    <div>
+      <p class="info-titles">ISP</p>
+      <p class="info" id="isp">SpaceX</p>
+    </div>
+  </div>
+
+
+  <div id="map"></div>
+
+  <!-- this is the script to get the map -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    console.log("calling script");
+    var ip = "";
+    var loc = "";
+    var timezone = "";
+    var isp = "";
+
+    // when the user puts an IP in
+    function searchIP() {
+      let userIP = document.getElementById("user_search").value;
+      ip = userIP;
+      logJSONData(userIP);
+    }
+
+    logJSONData(ip)
+
+    async function logJSONData(userIP) {
+      // create a map using https://geo.ipify.org/docs
+      const apiKey = "at_ysI4OWawEO0Z7IXkKZQdIKFZNgoRY";
+      const apiUrl = `https://geo.ipify.org/api/v1?apiKey=${apiKey}&ipAddress=${userIP}`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      console.log(data);
+
+      ip = data.ip;
+      loc = data.location.country;
+      timezone = data.location.timezone;
+      isp = data.isp;
+
+      document.getElementById("ip").innerHTML = ip;
+      document.getElementById("loc").innerHTML = loc;
+      document.getElementById("timezone").innerHTML = "UTC" + timezone;
+      document.getElementById("isp").innerHTML = isp;
+
+      // https://leafletjs.com/reference.html
+      if (data.location.lat && data.location.lng) {
+        const latitude = data.location.lat;
+        const longitude = data.location.lng;
+
+        // setView([coordinates], zoom)
+        map.setView([latitude, longitude], 15);
+        L.marker([latitude, longitude]).addTo(map);
+      }
+    }
+
+    var map = L.map('map').setView([51.505, -0.09], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+      maxZoom: 18,
+    }).addTo(map);
+  </script>
+</body>
+
+</html>
